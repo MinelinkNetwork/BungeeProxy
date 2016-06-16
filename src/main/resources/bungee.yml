@@ -1,0 +1,4 @@
+name: BungeeProxy
+version: ${version}
+author: Byteflux
+main: net.minelink.bungeeproxy.BungeeProxy
