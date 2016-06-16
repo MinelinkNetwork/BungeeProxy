@@ -18,39 +18,27 @@ import java.net.InetSocketAddress;
 import java.util.logging.Level;
 
 public class BungeeProxy extends Plugin {
-    private static final Field remoteAddressField;
-    private static final Field serverChild;
-    private static final ChannelInitializer<Channel> bungeeChannelInitializer;
-    private static final Method initChannelMethod;
-    private static final Field handlerField;
-
-    static {
+    @Override
+    public void onEnable() {
         try {
-            remoteAddressField = AbstractChannel.class.getDeclaredField("remoteAddress");
+            Field remoteAddressField = AbstractChannel.class.getDeclaredField("remoteAddress");
             remoteAddressField.setAccessible(true);
 
-            serverChild = PipelineUtils.class.getField("SERVER_CHILD");
+            Field serverChild = PipelineUtils.class.getField("SERVER_CHILD");
             serverChild.setAccessible(true);
 
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
             modifiersField.setInt(serverChild, serverChild.getModifiers() & ~Modifier.FINAL);
 
-            bungeeChannelInitializer = PipelineUtils.SERVER_CHILD;
+            ChannelInitializer<Channel> bungeeChannelInitializer = PipelineUtils.SERVER_CHILD;
 
-            initChannelMethod = ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
+            Method initChannelMethod = ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
             initChannelMethod.setAccessible(true);
 
-            handlerField = HandlerBoss.class.getDeclaredField("handler");
+            Field handlerField = HandlerBoss.class.getDeclaredField("handler");
             handlerField.setAccessible(true);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
-    @Override
-    public void onEnable() {
-        try {
             serverChild.set(null, new ChannelInitializer<Channel>() {
                 @Override
                 protected void initChannel(Channel channel) throws Exception {
