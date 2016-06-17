@@ -4,7 +4,6 @@ import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.HAProxyMessage;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 
 import java.lang.reflect.Field;
@@ -31,9 +30,6 @@ public class BungeeProxy extends Plugin {
 
             Method initChannelMethod = ChannelInitializer.class.getDeclaredMethod("initChannel", Channel.class);
             initChannelMethod.setAccessible(true);
-
-            Field handlerField = HandlerBoss.class.getDeclaredField("handler");
-            handlerField.setAccessible(true);
 
             serverChild.set(null, new ChannelInitializer<Channel>() {
                 @Override
