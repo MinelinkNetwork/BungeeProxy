@@ -1,14 +1,10 @@
 package net.minelink.bungeeproxy;
 
-import io.netty.channel.AbstractChannel;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
+import io.netty.channel.*;
 import io.netty.handler.codec.haproxy.HAProxyMessage;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.netty.HandlerBoss;
-import net.md_5.bungee.netty.PacketHandler;
 import net.md_5.bungee.netty.PipelineUtils;
 
 import java.lang.reflect.Field;
@@ -44,8 +40,7 @@ public class BungeeProxy extends Plugin {
                 protected void initChannel(Channel channel) throws Exception {
                     initChannelMethod.invoke(bungeeChannelInitializer, channel);
                     channel.pipeline().addAfter(PipelineUtils.TIMEOUT_HANDLER, "haproxy-decoder", new HAProxyMessageDecoder());
-
-                    HandlerBoss handlerBoss = new HandlerBoss() {
+                    channel.pipeline().addAfter("haproxy-decoder", "haproxy-handler", new ChannelInboundHandlerAdapter() {
                         @Override
                         public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                             if (msg instanceof HAProxyMessage) {
@@ -55,10 +50,7 @@ public class BungeeProxy extends Plugin {
                                 super.channelRead(ctx, msg);
                             }
                         }
-                    };
-
-                    handlerBoss.setHandler((PacketHandler) handlerField.get(channel.pipeline().get(HandlerBoss.class)));
-                    channel.pipeline().replace(PipelineUtils.BOSS_HANDLER, PipelineUtils.BOSS_HANDLER, handlerBoss);
+                    });
                 }
             });
         } catch (Exception e) {
